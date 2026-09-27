@@ -1,14 +1,19 @@
-USE ShopDB; 
-IF EXISTS (SELECT * FROM sys.databases WHERE name = 'ShopDB')
-BEGIN
-    DROP DATABASE ShopDB;
-END
--- Create your stored procedure here
+DROP DATABASE IF EXISTS ShopDB;
+CREATE DATABASE ShopDB;
+USE ShopDB;
+
 DELIMITER //
 CREATE PROCEDURE get_warehouse_product_inventory(
-    IN NameFilter varchar(100)
+    IN warehouse_id INT
 )
 BEGIN
-    SELECT * FROM WarehouseProductInventory WHERE ProductName like NameFilter;
+    SELECT
+        p.Name AS ProductName,
+        SUM(pi.WarehouseAmount) AS ProductAmount
+    FROM ProductInventory AS pi
+    JOIN Products AS p ON p.ID = pi.ProductID
+    WHERE pi.WarehouseID = warehouse_id
+    GROUP BY p.Name
+    ORDER BY p.Name;
 END //
 DELIMITER ;
